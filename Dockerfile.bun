@@ -1,0 +1,27 @@
+# ---- Build Stage ----
+FROM oven/bun:1.1.13-alpine AS builder
+
+WORKDIR /app
+
+# Copy all files
+COPY . .
+
+# Install dependencies
+RUN bun install
+
+# Build Next.js app
+RUN bun run build
+
+# ---- Production Stage ----
+FROM oven/bun:1.1.13-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy only necessary files from builder
+COPY --from=builder /app/ ./
+
+EXPOSE 3000
+
+CMD ["bun", "run", "start"]
